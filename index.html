@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>AC Workshop</title>
+<meta charset="UTF-8">
+<title>AC Workshop</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #0a0f1c;
-      color: #00d9ff;
-      font-family: monospace;
-    }
+<style>
+body {
+  margin: 0;
+  background: #0a0f1c;
+  color: #00d9ff;
+  font-family: monospace;
+}
 
-    h1 {
-      padding: 10px;
-    }
+h1 { padding: 10px; }
 
-    .container {
-      display: flex;
-      height: 90vh;
-    }
+.container {
+  display: flex;
+  height: 90vh;
+}
 
-    .panel {
-      flex: 1;
-      border: 1px solid #00d9ff;
-      padding: 10px;
-      overflow-y: auto;
-    }
+.panel {
+  flex: 1;
+  border: 1px solid #00d9ff;
+  padding: 10px;
+  overflow-y: auto;
+}
 
-    .item {
-      padding: 5px;
-      cursor: pointer;
-    }
+.item {
+  padding: 5px;
+  cursor: pointer;
+}
 
-    .item:hover {
-      color: white;
-    }
+.item:hover {
+  color: white;
+}
 
-    .build {
-      color: #00ff99;
-    }
-  </style>
+.build {
+  color: #00ff99;
+}
+</style>
 </head>
 
 <body>
@@ -57,141 +55,247 @@
 <script>
 
 // =====================
-// BUILD STATE
+// BUILD SYSTEM
 // =====================
 const build = {};
 
+// Only one per category rule
+function setBuild(category, value) {
+  build[category] = value;
+  renderBuild();
+}
+
+function setWeapon(side, value) {
+  build[side] = value;
+  renderBuild();
+}
+
+function renderBuild() {
+  const statsDiv = document.getElementById("stats");
+  statsDiv.innerHTML = "<h3>BUILD</h3>";
+
+  for (let k in build) {
+    let d = document.createElement("div");
+    d.className = "build";
+    d.innerText = k + ": " + build[k];
+    statsDiv.appendChild(d);
+  }
+}
+
 // =====================
-// DATA (YOUR SYSTEM)
+// FULL DATASET (UNCHANGED NAMES)
 // =====================
 const data = {
 
-  Heads: {
-    "Heads": [
-      { name: "KE Head", stats: "WP:200" },
-      { name: "CE Head", stats: "WP:225" },
-      { name: "TE Head", stats: "WP:275" }
-    ]
-  },
+Heads: {
+  "Heads": [
+    { name: "-KE Head / WP:200", stats: "" },
+    { name: "-CE Head / WP:225", stats: "" },
+    { name: "-TE Head / WP:275", stats: "" }
+  ]
+},
 
-  Cores: {
-    "KE Cores": [
-      { name: "Light KE Core", stats: "WP:575 | Low armor" },
-      { name: "Middle KE Core", stats: "WP:725 | Low-Mid armor" }
-    ],
-    "CE Cores": [
-      { name: "Middle CE Core", stats: "WP:850 | +15 delay" },
-      { name: "Heavy CE Core", stats: "WP:1000 | +20 delay" }
-    ],
-    "TE Cores": [
-      { name: "Middle TE Core", stats: "WP:1150 | Dome x1" },
-      { name: "Heavy TE Core", stats: "WP:1250 | Dome x2" }
-    ]
-  },
+Cores: {
+  "KE Cores": [
+    { name: "-Light KE Core / WP:575", stats: "Low armor" },
+    { name: "-Middle KE Core / WP:725", stats: "Low-Mid armor" }
+  ],
+  "CE Cores": [
+    { name: "-Middle CE Core / WP:850", stats: "Mid armor{User can up the usage time of ultimate weapons by 15 delay block units}" },
+    { name: "-Heavy CE Core / WP:1000", stats: "Mid-Heavy armor{User can up the usage time of ultimate weapons by 20 delay block units}" }
+  ],
+  "TE Cores": [
+    { name: "-Middle TE Core / WP:1150", stats: "Heavy armor{User can add a single dome camera dropper on their core}" },
+    { name: "-Heavy TE Core / WP:1250", stats: "Heaviest armor{User can add two dome camera droppers on their core}" }
+  ]
+},
 
-  Arms: {
-    "KE Arms": [
-      { name: "KE Light Arms", stats: "WP:275" },
-      { name: "KE Heavy Arms", stats: "WP:525" }
-    ],
-    "CE Arms": [
-      { name: "CE Light Arms", stats: "WP:325" },
-      { name: "CE Heavy Arms", stats: "WP:575" }
-    ]
-  },
+ARMS: {
+  "KE Arms": [
+    { name: "-KE Light Arms / WP:275", stats: "Light armor. No shoulder unit" },
+    { name: "-KE Middle Arms / WP:450", stats: "Normal armor. One shoulder unit" },
+    { name: "-KE Heavy Arms / WP:525", stats: "Normal armor. Two shoulder units" }
+  ],
+  "CE Arms": [
+    { name: "-CE Light Arms / WP: 325", stats: "Low armor. No shoulder unit" },
+    { name: "-CE Middle Arms / WP:475", stats: "Normal armor. One shoulder unit" },
+    { name: "-CE Heavy Arms / WP:575", stats: "Normal armor. Two shoulder units" }
+  ],
+  "TE Arms": [
+    { name: "-TE Middle Arms / WP:850", stats: "Normal to Heavy armor. One shoulder unit" },
+    { name: "-TE Heavy Arms / WP:1000", stats: "Heavy armor. Two shoulder units" }
+  ],
+  "Weapon arms": [
+    { name: "-CE Sniper Cannon Arms / WP:2000", stats: "14 cannons{In either the left or right arm.A big sniper cannon without any zoom making aiming difficult}" },
+    { name: "-MELEE Blade Arms / WP:2500", stats: "Six spike blocks per blade. Collision spikes.{Dual arm axe like blades,close range but devestating damage}" },
+    { name: "-CE Scatter Cannon Arms / WP:2050", stats: "Five cannon blocks each arm spread fire" },
+    { name: "-CE Cannon Arms / WP:2450", stats: "Six cannon blocks each arm hard shots" },
+    { name: "-TE Laser Cannon Arms / WP:2150", stats: "Nine minigun blocks spread fire" },
+    { name: "-TE Scatter Pulse Arms / WP:2300", stats: "Pulse spread weapons low accuracy high coverage" }
+  ],
+  "Experimental Weapon Arms": [
+    { name: "-Shield Arms / WP:2200", stats: "Transforms into shield with spike ramming capability" },
+    { name: "-Repeater Cannon Arms / WP:2150", stats: "Three cannon burst delayed fire" }
+  ]
+},
 
-  Legs: {
-    "Bipedal": [
-      { name: "Light Biped", stats: "Fast" },
-      { name: "Heavy Biped", stats: "Load" }
-    ]
-  },
+LEGS: {
+  "Bipedal legs": [
+    { name: "-Light Fast spec", stats: "" },
+    { name: "-Light Load spec", stats: "" },
+    { name: "-Mid Fast spec", stats: "" },
+    { name: "-Mid Balance spec", stats: "" },
+    { name: "-Mid Load spec", stats: "" },
+    { name: "-Heavy Fast spec", stats: "" },
+    { name: "-Heavy Balance spec", stats: "" },
+    { name: "-Heavy Load spec", stats: "" }
+  ],
+  "Reverse legs": [
+    { name: "-Light Fast spec", stats: "" },
+    { name: "-Light Turning spec", stats: "" },
+    { name: "-Light Load spec", stats: "" },
+    { name: "-Heavy Fast spec", stats: "" },
+    { name: "-Heavy Balance spec", stats: "" },
+    { name: "-Heavy Load spec", stats: "" }
+  ],
+  "Tetrapod legs": [
+    { name: "-Fast spec", stats: "" },
+    { name: "-Load spec", stats: "" }
+  ],
+  "Tank legs": [
+    { name: "-Fast spec", stats: "" },
+    { name: "-Balance spec", stats: "" },
+    { name: "-Load spec", stats: "" }
+  ]
+},
 
-  FCS: {
-    "Types": [
-      { name: "High Speed", stats: "Vertical: 3" },
-      { name: "Normal", stats: "Vertical: 2" },
-      { name: "Low Speed", stats: "Vertical: 1" }
-    ]
-  },
+FCS: {
+  "FCS": [
+    { name: "-High speed type / Vertical aiming speed = 3", stats: "Good for melee and light ACs." },
+    { name: "-Normal speed type / Vertical aiming speed = 2", stats: "Balanced for all weapon types." },
+    { name: "-Low speed type / Vertical aiming speed = 1", stats: "Good for long range fights." }
+  ]
+},
 
-  Boosters: {
-    "Boosters": [
-      { name: "Low Energy", stats: "" },
-      { name: "High Power", stats: "" }
-    ]
-  },
+Boosters: {
+  "Boosters": [
+    { name: "-Low energy-consumption type", stats: "" },
+    { name: "-High acceleration type", stats: "" },
+    { name: "-High power type", stats: "" },
+    { name: "-Balanced type", stats: "" }
+  ]
+},
 
-  Weapons: {
-    "KE": [
-      { name: "Handgun", stats: "WP:250" },
-      { name: "Rifle", stats: "WP:525" }
-    ],
-    "CE": [
-      { name: "Shotgun", stats: "WP:450" },
-      { name: "Sniper Rifle", stats: "WP:625" }
-    ],
-    "TE": [
-      { name: "Pulse Gun", stats: "WP:250" },
-      { name: "Laser Rifle", stats: "WP:600" }
-    ]
-  }
+Weapons: {
+  "KE Weapons": [
+    { name: "-Handgun / WP: 250", stats: "" },
+    { name: "-Rifle / WP: 525", stats: "" },
+    { name: "-Gatling Gun / WP: 950", stats: "" },
+    { name: "-Light Gatling Gun / WP: 375", stats: "" },
+    { name: "-Auto Cannon (4 barrel) / WP: 1025", stats: "" },
+    { name: "-Auto Cannon (3 barrel) / WP: 1025", stats: "" }
+  ],
+  "CE Weapons": [
+    { name: "-Shotgun / WP: 450", stats: "" },
+    { name: "-Sniper Rifle / WP: 625", stats: "" },
+    { name: "-H.E.A.T. Howitzer / WP:375", stats: "" },
+    { name: "-H.E.A.T. Machine Gun / WP: 275", stats: "" },
+    { name: "-Batle Riffle / WP: 975", stats: "" },
+    { name: "-Repeater Cannon / WP: 850", stats: "" },
+    { name: "-Sniper Cannon / WP: 1000", stats: "" },
+    { name: "-Howitzer Cannon / WP: 1250", stats: "" }
+  ],
+  "TE Weapons": [
+    { name: "-Pulse Gun / WP: 250", stats: "" },
+    { name: "-Pulse Machine Gun / WP: 425", stats: "" },
+    { name: "-Plasma Gun / WP: 875", stats: "" },
+    { name: "-Laser Rifle (Ammo) / WP:600", stats: "" },
+    { name: "-Laser Rifle (Damage) / WP: 1375", stats: "" },
+    { name: "-Pulse Cannon / WP: 1000", stats: "" },
+    { name: "-Laser Cannon / WP: 1300", stats: "" }
+  ],
+  "Melee": [
+    { name: "-Physical Blade / WP: 150", stats: "" },
+    { name: "-Pile Driver / WP: 225", stats: "" },
+    { name: "-H.E.A.T. Pile Driver / WP: 300", stats: "WARNING HIGH RISK OF SELF HARM." }
+  ],
+  "Shields": [
+    { name: "-Shield KE / WP: 500", stats: "" },
+    { name: "-Shield CE / WP: 525", stats: "" },
+    { name: "-Shield TE / WP: 600", stats: "" }
+  ],
+  "Sentries": [
+    { name: "-KE", stats: "" },
+    { name: "-CE", stats: "" },
+    { name: "-TE", stats: "" }
+  ]
+},
+
+"Shoulder units": {
+  "Defense": [
+    { name: "-Shield dropper / WP: 400", stats: "" },
+    { name: "-Mine dropper / WP: 325", stats: "" }
+  ],
+  "Support": [
+    { name: "-Energy Amplifier / WP: 650", stats: "" },
+    { name: "-Reserve Magazine / WP:650", stats: "" }
+  ],
+  "Offensive": [
+    { name: "-H.E.A.T. Rockets / WP: 600", stats: "" },
+    { name: "-Plasma Spitter / WP: 550", stats: "" }
+  ]
+}
 
 };
 
 // =====================
-// DOM ELEMENTS
+// UI SYSTEM
 // =====================
 const catDiv = document.getElementById("categories");
 const subDiv = document.getElementById("subcategories");
 const partDiv = document.getElementById("parts");
 const statsDiv = document.getElementById("stats");
 
-// =====================
-// BUILD DISPLAY
-// =====================
-function updateBuild() {
-  statsDiv.innerHTML = "<h3>BUILD</h3>";
+let currentCat = null;
+let currentSub = null;
 
-  for (let k in build) {
+function loadCats() {
+  catDiv.innerHTML = "";
+
+  Object.keys(data).forEach(cat => {
     let el = document.createElement("div");
-    el.className = "build";
-    el.innerText = k + ": " + build[k];
-    statsDiv.appendChild(el);
-  }
+    el.className = "item";
+    el.innerText = cat;
+    el.onclick = () => loadSub(cat);
+    catDiv.appendChild(el);
+  });
 }
 
-// =====================
-// SELECT PART
-// =====================
-function select(category, name, side = null) {
+function loadSub(cat) {
+  currentCat = cat;
+  subDiv.innerHTML = "";
+  partDiv.innerHTML = "";
 
-  if (side === "L") build["Left Arm"] = name;
-  else if (side === "R") build["Right Arm"] = name;
-  else build[category] = name;
-
-  updateBuild();
+  Object.keys(data[cat]).forEach(sub => {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = sub;
+    el.onclick = () => loadParts(cat, sub);
+    subDiv.appendChild(el);
+  });
 }
 
-// =====================
-// LOAD PARTS
-// =====================
-function loadParts(cat, sub, special = null) {
-
+function loadParts(cat, sub) {
+  currentSub = sub;
   partDiv.innerHTML = "";
 
   data[cat][sub].forEach(p => {
-
     let el = document.createElement("div");
     el.className = "item";
     el.innerText = p.name;
 
     el.onclick = () => {
-
-      if (special === "L") select("Weapons", p.name, "L");
-      else if (special === "R") select("Weapons", p.name, "R");
-      else select(cat, p.name);
-
+      setBuild(cat, p.name);
       statsDiv.innerHTML = "<h3>STATS</h3><div>" + p.stats + "</div>";
     };
 
@@ -200,67 +304,10 @@ function loadParts(cat, sub, special = null) {
 }
 
 // =====================
-// LOAD SUBCATEGORIES
-// =====================
-function loadSub(cat, special = null) {
-
-  subDiv.innerHTML = "";
-  partDiv.innerHTML = "";
-
-  for (let sub in data[cat]) {
-
-    let el = document.createElement("div");
-    el.className = "item";
-    el.innerText = sub;
-
-    el.onclick = () => loadParts(cat, sub, special);
-
-    subDiv.appendChild(el);
-  }
-}
-
-// =====================
-// LOAD CATEGORIES
-// =====================
-function loadCats() {
-
-  catDiv.innerHTML = "";
-
-  Object.keys(data).forEach(cat => {
-
-    let el = document.createElement("div");
-    el.className = "item";
-    el.innerText = cat;
-
-    el.onclick = () => loadSub(cat);
-
-    catDiv.appendChild(el);
-  });
-
-  // Left / Right weapon entry points
-  ["Left Arm Weapon", "Right Arm Weapon"].forEach(side => {
-
-    let el = document.createElement("div");
-    el.className = "item";
-    el.innerText = side;
-
-    el.onclick = () => {
-
-      if (side.includes("Left")) loadSub("Weapons", "L");
-      else loadSub("Weapons", "R");
-
-    };
-
-    catDiv.appendChild(el);
-  });
-
-}
-
-// =====================
 // INIT
 // =====================
 loadCats();
-updateBuild();
+renderBuild();
 
 </script>
 
