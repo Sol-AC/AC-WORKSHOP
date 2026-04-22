@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AC Workshop</title>
+  <style>
+    body { background: #0a0f1c; color: #00d9ff; font-family: monospace; }
+    .container { display: flex; }
+    .panel { padding: 10px; border: 1px solid #00d9ff; margin: 5px; width: 25%; }
+    .item { cursor: pointer; margin: 5px 0; }
+    .item:hover { color: white; }
+  </style>
+</head>
+
+<body>
+  <h1>ASSEMBLY BAY</h1>
+
+  <div class="container">
+    <div class="panel" id="categories"></div>
+    <div class="panel" id="subcategories"></div>
+    <div class="panel" id="parts"></div>
+    <div class="panel" id="stats"></div>
+  </div>
+
+<script>
+const data = {
+  Heads: {
+    "CE Defense": [
+      { name: "HD-01", stats: "CE: 120 | Weight: 50" },
+      { name: "HD-02", stats: "CE: 150 | Weight: 65" }
+    ],
+    "KE Defense": [
+      { name: "HD-03", stats: "KE: 200 | Weight: 70" }
+    ]
+  },
+  Weapons: {
+    "Laser": [
+      { name: "LX Cannon", stats: "Damage: 300 | EN: 80" }
+    ]
+  }
+};
+
+const categoriesDiv = document.getElementById("categories");
+const subDiv = document.getElementById("subcategories");
+const partsDiv = document.getElementById("parts");
+const statsDiv = document.getElementById("stats");
+
+function loadCategories() {
+  categoriesDiv.innerHTML = "";
+  for (let cat in data) {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = cat;
+    el.onclick = () => loadSub(cat);
+    categoriesDiv.appendChild(el);
+  }
+}
+
+function loadSub(cat) {
+  subDiv.innerHTML = "";
+  partsDiv.innerHTML = "";
+  statsDiv.innerHTML = "";
+
+  for (let sub in data[cat]) {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = sub;
+    el.onclick = () => loadParts(cat, sub);
+    subDiv.appendChild(el);
+  }
+}
+
+function loadParts(cat, sub) {
+  partsDiv.innerHTML = "";
+  statsDiv.innerHTML = "";
+
+  data[cat][sub].forEach(part => {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = part.name;
+    el.onclick = () => statsDiv.innerText = part.stats;
+    partsDiv.appendChild(el);
+  });
+}
+
+loadCategories();
+</script>
+
+</body>
+</html>
