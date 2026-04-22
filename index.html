@@ -1,3 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AC Workshop</title>
+  <style>
+    body { background: #0a0f1c; color: #00d9ff; font-family: monospace; }
+    .container { display: flex; }
+    .panel { padding: 10px; border: 1px solid #00d9ff; margin: 5px; width: 25%; }
+    .item { cursor: pointer; margin: 5px 0; }
+    .item:hover { color: white; }
+  </style>
+</head>
+
+<body>
+  <h1>ASSEMBLY BAY</h1>
+
+  <div class="container">
+    <div class="panel" id="categories"></div>
+    <div class="panel" id="subcategories"></div>
+    <div class="panel" id="parts"></div>
+    <div class="panel" id="stats"></div>
+  </div>
+
+<script>
 <script>
 
 const build = {}; // stores selected parts
@@ -183,3 +207,7 @@ function loadParts(cat, sub, special=null) {
 loadCategories();
 
 </script>
+</script>
+
+</body>
+</html>
