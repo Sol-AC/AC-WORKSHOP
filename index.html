@@ -1,130 +1,131 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>AC Workshop</title>
+
   <style>
-    body { background: #0a0f1c; color: #00d9ff; font-family: monospace; }
-    .container { display: flex; }
-    .panel { padding: 10px; border: 1px solid #00d9ff; margin: 5px; width: 25%; }
-    .item { cursor: pointer; margin: 5px 0; }
-    .item:hover { color: white; }
+    body {
+      margin: 0;
+      background: #0a0f1c;
+      color: #00d9ff;
+      font-family: monospace;
+    }
+
+    h1 {
+      padding: 10px;
+    }
+
+    .container {
+      display: flex;
+      height: 90vh;
+    }
+
+    .panel {
+      flex: 1;
+      border: 1px solid #00d9ff;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .item {
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .item:hover {
+      color: white;
+    }
+
+    .build {
+      color: #00ff99;
+    }
   </style>
 </head>
 
 <body>
-  <h1>ASSEMBLY BAY</h1>
 
-  <div class="container">
-    <div class="panel" id="categories"></div>
-    <div class="panel" id="subcategories"></div>
-    <div class="panel" id="parts"></div>
-    <div class="panel" id="stats"></div>
-  </div>
+<h1>ASSEMBLY BAY</h1>
+
+<div class="container">
+  <div class="panel" id="categories"></div>
+  <div class="panel" id="subcategories"></div>
+  <div class="panel" id="parts"></div>
+  <div class="panel" id="stats"></div>
+</div>
 
 <script>
-<script>
 
-const build = {}; // stores selected parts
+// =====================
+// BUILD STATE
+// =====================
+const build = {};
 
-function updateBuildDisplay() {
-  const statsDiv = document.getElementById("stats");
-  statsDiv.innerHTML = "<h3>BUILD</h3>";
-
-  for (let key in build) {
-    let line = document.createElement("div");
-    line.innerText = build[key];
-    statsDiv.appendChild(line);
-  }
-}
-
-function selectPart(category, partName, isLeft=false, isRight=false) {
-
-  if (isLeft) {
-    build["Left Arm"] = "L: " + partName;
-  } else if (isRight) {
-    build["Right Arm"] = "R: " + partName;
-  } else {
-    build[category] = partName;
-  }
-
-  updateBuildDisplay();
-}
-
+// =====================
+// DATA (YOUR SYSTEM)
+// =====================
 const data = {
 
-  // ===== HEADS =====
   Heads: {
-    "All Heads": [
+    "Heads": [
       { name: "KE Head", stats: "WP:200" },
       { name: "CE Head", stats: "WP:225" },
       { name: "TE Head", stats: "WP:275" }
     ]
   },
 
-  // ===== CORES =====
   Cores: {
-    "KE": [
+    "KE Cores": [
       { name: "Light KE Core", stats: "WP:575 | Low armor" },
       { name: "Middle KE Core", stats: "WP:725 | Low-Mid armor" }
     ],
-    "CE": [
+    "CE Cores": [
       { name: "Middle CE Core", stats: "WP:850 | +15 delay" },
       { name: "Heavy CE Core", stats: "WP:1000 | +20 delay" }
     ],
-    "TE": [
+    "TE Cores": [
       { name: "Middle TE Core", stats: "WP:1150 | Dome x1" },
       { name: "Heavy TE Core", stats: "WP:1250 | Dome x2" }
     ]
   },
 
-  // ===== ARMS =====
   Arms: {
     "KE Arms": [
-      { name: "KE Light Arms", stats: "WP:275 | No shoulder" },
-      { name: "KE Middle Arms", stats: "WP:450 | 1 shoulder" },
-      { name: "KE Heavy Arms", stats: "WP:525 | 2 shoulder" }
+      { name: "KE Light Arms", stats: "WP:275" },
+      { name: "KE Heavy Arms", stats: "WP:525" }
     ],
     "CE Arms": [
-      { name: "CE Light Arms", stats: "WP:325 | No shoulder" },
-      { name: "CE Middle Arms", stats: "WP:475 | 1 shoulder" },
-      { name: "CE Heavy Arms", stats: "WP:575 | 2 shoulder" }
+      { name: "CE Light Arms", stats: "WP:325" },
+      { name: "CE Heavy Arms", stats: "WP:575" }
     ]
   },
 
-  // ===== LEGS (simplified for now—you can expand later) =====
   Legs: {
     "Bipedal": [
       { name: "Light Biped", stats: "Fast" },
-      { name: "Mid Biped", stats: "Balanced" },
       { name: "Heavy Biped", stats: "Load" }
     ]
   },
 
-  // ===== FCS =====
   FCS: {
     "Types": [
-      { name: "High Speed", stats: "Vertical:3" },
-      { name: "Normal", stats: "Vertical:2" },
-      { name: "Low Speed", stats: "Vertical:1" }
+      { name: "High Speed", stats: "Vertical: 3" },
+      { name: "Normal", stats: "Vertical: 2" },
+      { name: "Low Speed", stats: "Vertical: 1" }
     ]
   },
 
-  // ===== BOOSTERS =====
   Boosters: {
-    "All": [
+    "Boosters": [
       { name: "Low Energy", stats: "" },
-      { name: "High Acceleration", stats: "" },
-      { name: "High Power", stats: "" },
-      { name: "Balanced", stats: "" }
+      { name: "High Power", stats: "" }
     ]
   },
 
-  // ===== WEAPONS (USED BY BOTH ARMS) =====
   Weapons: {
     "KE": [
       { name: "Handgun", stats: "WP:250" },
-      { name: "Rifle", stats: "WP:525" },
-      { name: "Gatling Gun", stats: "WP:950" }
+      { name: "Rifle", stats: "WP:525" }
     ],
     "CE": [
       { name: "Shotgun", stats: "WP:450" },
@@ -138,75 +139,129 @@ const data = {
 
 };
 
-const categoriesDiv = document.getElementById("categories");
+// =====================
+// DOM ELEMENTS
+// =====================
+const catDiv = document.getElementById("categories");
 const subDiv = document.getElementById("subcategories");
-const partsDiv = document.getElementById("parts");
+const partDiv = document.getElementById("parts");
 const statsDiv = document.getElementById("stats");
 
-function loadCategories() {
-  categoriesDiv.innerHTML = "";
+// =====================
+// BUILD DISPLAY
+// =====================
+function updateBuild() {
+  statsDiv.innerHTML = "<h3>BUILD</h3>";
 
-  Object.keys(data).forEach(cat => {
+  for (let k in build) {
+    let el = document.createElement("div");
+    el.className = "build";
+    el.innerText = k + ": " + build[k];
+    statsDiv.appendChild(el);
+  }
+}
+
+// =====================
+// SELECT PART
+// =====================
+function select(category, name, side = null) {
+
+  if (side === "L") build["Left Arm"] = name;
+  else if (side === "R") build["Right Arm"] = name;
+  else build[category] = name;
+
+  updateBuild();
+}
+
+// =====================
+// LOAD PARTS
+// =====================
+function loadParts(cat, sub, special = null) {
+
+  partDiv.innerHTML = "";
+
+  data[cat][sub].forEach(p => {
+
     let el = document.createElement("div");
     el.className = "item";
-    el.innerText = cat;
-    el.onclick = () => loadSub(cat);
-    categoriesDiv.appendChild(el);
-  });
+    el.innerText = p.name;
 
-  // ADD LEFT / RIGHT ARM MANUALLY
-  ["Left Arm Weapon", "Right Arm Weapon"].forEach(side => {
-    let el = document.createElement("div");
-    el.className = "item";
-    el.innerText = side;
-    el.onclick = () => loadSub("Weapons", side);
-    categoriesDiv.appendChild(el);
+    el.onclick = () => {
+
+      if (special === "L") select("Weapons", p.name, "L");
+      else if (special === "R") select("Weapons", p.name, "R");
+      else select(cat, p.name);
+
+      statsDiv.innerHTML = "<h3>STATS</h3><div>" + p.stats + "</div>";
+    };
+
+    partDiv.appendChild(el);
   });
 }
 
-function loadSub(cat, special=null) {
+// =====================
+// LOAD SUBCATEGORIES
+// =====================
+function loadSub(cat, special = null) {
+
   subDiv.innerHTML = "";
-  partsDiv.innerHTML = "";
-  statsDiv.innerHTML = "";
+  partDiv.innerHTML = "";
 
-  let source = data[cat];
+  for (let sub in data[cat]) {
 
-  for (let sub in source) {
     let el = document.createElement("div");
     el.className = "item";
     el.innerText = sub;
+
     el.onclick = () => loadParts(cat, sub, special);
+
     subDiv.appendChild(el);
   }
 }
 
-function loadParts(cat, sub, special=null) {
-  partsDiv.innerHTML = "";
+// =====================
+// LOAD CATEGORIES
+// =====================
+function loadCats() {
 
-  data[cat][sub].forEach(part => {
+  catDiv.innerHTML = "";
+
+  Object.keys(data).forEach(cat => {
+
     let el = document.createElement("div");
     el.className = "item";
-    el.innerText = part.name;
+    el.innerText = cat;
+
+    el.onclick = () => loadSub(cat);
+
+    catDiv.appendChild(el);
+  });
+
+  // Left / Right weapon entry points
+  ["Left Arm Weapon", "Right Arm Weapon"].forEach(side => {
+
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = side;
 
     el.onclick = () => {
-      if (special === "Left Arm Weapon") {
-        selectPart("Weapons", part.name, true, false);
-      } else if (special === "Right Arm Weapon") {
-        selectPart("Weapons", part.name, false, true);
-      } else {
-        selectPart(cat, part.name);
-      }
 
-      statsDiv.innerText = part.stats;
+      if (side.includes("Left")) loadSub("Weapons", "L");
+      else loadSub("Weapons", "R");
+
     };
 
-    partsDiv.appendChild(el);
+    catDiv.appendChild(el);
   });
+
 }
 
-loadCategories();
+// =====================
+// INIT
+// =====================
+loadCats();
+updateBuild();
 
-</script>
 </script>
 
 </body>
