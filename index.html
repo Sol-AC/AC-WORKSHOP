@@ -1,42 +1,117 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>AC Workshop</title>
-  <style>
-    body { background: #0a0f1c; color: #00d9ff; font-family: monospace; }
-    .container { display: flex; }
-    .panel { padding: 10px; border: 1px solid #00d9ff; margin: 5px; width: 25%; }
-    .item { cursor: pointer; margin: 5px 0; }
-    .item:hover { color: white; }
-  </style>
-</head>
-
-<body>
-  <h1>ASSEMBLY BAY</h1>
-
-  <div class="container">
-    <div class="panel" id="categories"></div>
-    <div class="panel" id="subcategories"></div>
-    <div class="panel" id="parts"></div>
-    <div class="panel" id="stats"></div>
-  </div>
-
 <script>
+
+const build = {}; // stores selected parts
+
+function updateBuildDisplay() {
+  const statsDiv = document.getElementById("stats");
+  statsDiv.innerHTML = "<h3>BUILD</h3>";
+
+  for (let key in build) {
+    let line = document.createElement("div");
+    line.innerText = build[key];
+    statsDiv.appendChild(line);
+  }
+}
+
+function selectPart(category, partName, isLeft=false, isRight=false) {
+
+  if (isLeft) {
+    build["Left Arm"] = "L: " + partName;
+  } else if (isRight) {
+    build["Right Arm"] = "R: " + partName;
+  } else {
+    build[category] = partName;
+  }
+
+  updateBuildDisplay();
+}
+
 const data = {
+
+  // ===== HEADS =====
   Heads: {
-    "CE Defense": [
-      { name: "HD-01", stats: "CE: 120 | Weight: 50" },
-      { name: "HD-02", stats: "CE: 150 | Weight: 65" }
-    ],
-    "KE Defense": [
-      { name: "HD-03", stats: "KE: 200 | Weight: 70" }
+    "All Heads": [
+      { name: "KE Head", stats: "WP:200" },
+      { name: "CE Head", stats: "WP:225" },
+      { name: "TE Head", stats: "WP:275" }
     ]
   },
+
+  // ===== CORES =====
+  Cores: {
+    "KE": [
+      { name: "Light KE Core", stats: "WP:575 | Low armor" },
+      { name: "Middle KE Core", stats: "WP:725 | Low-Mid armor" }
+    ],
+    "CE": [
+      { name: "Middle CE Core", stats: "WP:850 | +15 delay" },
+      { name: "Heavy CE Core", stats: "WP:1000 | +20 delay" }
+    ],
+    "TE": [
+      { name: "Middle TE Core", stats: "WP:1150 | Dome x1" },
+      { name: "Heavy TE Core", stats: "WP:1250 | Dome x2" }
+    ]
+  },
+
+  // ===== ARMS =====
+  Arms: {
+    "KE Arms": [
+      { name: "KE Light Arms", stats: "WP:275 | No shoulder" },
+      { name: "KE Middle Arms", stats: "WP:450 | 1 shoulder" },
+      { name: "KE Heavy Arms", stats: "WP:525 | 2 shoulder" }
+    ],
+    "CE Arms": [
+      { name: "CE Light Arms", stats: "WP:325 | No shoulder" },
+      { name: "CE Middle Arms", stats: "WP:475 | 1 shoulder" },
+      { name: "CE Heavy Arms", stats: "WP:575 | 2 shoulder" }
+    ]
+  },
+
+  // ===== LEGS (simplified for now—you can expand later) =====
+  Legs: {
+    "Bipedal": [
+      { name: "Light Biped", stats: "Fast" },
+      { name: "Mid Biped", stats: "Balanced" },
+      { name: "Heavy Biped", stats: "Load" }
+    ]
+  },
+
+  // ===== FCS =====
+  FCS: {
+    "Types": [
+      { name: "High Speed", stats: "Vertical:3" },
+      { name: "Normal", stats: "Vertical:2" },
+      { name: "Low Speed", stats: "Vertical:1" }
+    ]
+  },
+
+  // ===== BOOSTERS =====
+  Boosters: {
+    "All": [
+      { name: "Low Energy", stats: "" },
+      { name: "High Acceleration", stats: "" },
+      { name: "High Power", stats: "" },
+      { name: "Balanced", stats: "" }
+    ]
+  },
+
+  // ===== WEAPONS (USED BY BOTH ARMS) =====
   Weapons: {
-    "Laser": [
-      { name: "LX Cannon", stats: "Damage: 300 | EN: 80" }
+    "KE": [
+      { name: "Handgun", stats: "WP:250" },
+      { name: "Rifle", stats: "WP:525" },
+      { name: "Gatling Gun", stats: "WP:950" }
+    ],
+    "CE": [
+      { name: "Shotgun", stats: "WP:450" },
+      { name: "Sniper Rifle", stats: "WP:625" }
+    ],
+    "TE": [
+      { name: "Pulse Gun", stats: "WP:250" },
+      { name: "Laser Rifle", stats: "WP:600" }
     ]
   }
+
 };
 
 const categoriesDiv = document.getElementById("categories");
@@ -46,44 +121,65 @@ const statsDiv = document.getElementById("stats");
 
 function loadCategories() {
   categoriesDiv.innerHTML = "";
-  for (let cat in data) {
+
+  Object.keys(data).forEach(cat => {
     let el = document.createElement("div");
     el.className = "item";
     el.innerText = cat;
     el.onclick = () => loadSub(cat);
     categoriesDiv.appendChild(el);
-  }
+  });
+
+  // ADD LEFT / RIGHT ARM MANUALLY
+  ["Left Arm Weapon", "Right Arm Weapon"].forEach(side => {
+    let el = document.createElement("div");
+    el.className = "item";
+    el.innerText = side;
+    el.onclick = () => loadSub("Weapons", side);
+    categoriesDiv.appendChild(el);
+  });
 }
 
-function loadSub(cat) {
+function loadSub(cat, special=null) {
   subDiv.innerHTML = "";
   partsDiv.innerHTML = "";
   statsDiv.innerHTML = "";
 
-  for (let sub in data[cat]) {
+  let source = data[cat];
+
+  for (let sub in source) {
     let el = document.createElement("div");
     el.className = "item";
     el.innerText = sub;
-    el.onclick = () => loadParts(cat, sub);
+    el.onclick = () => loadParts(cat, sub, special);
     subDiv.appendChild(el);
   }
 }
 
-function loadParts(cat, sub) {
+function loadParts(cat, sub, special=null) {
   partsDiv.innerHTML = "";
-  statsDiv.innerHTML = "";
 
   data[cat][sub].forEach(part => {
     let el = document.createElement("div");
     el.className = "item";
     el.innerText = part.name;
-    el.onclick = () => statsDiv.innerText = part.stats;
+
+    el.onclick = () => {
+      if (special === "Left Arm Weapon") {
+        selectPart("Weapons", part.name, true, false);
+      } else if (special === "Right Arm Weapon") {
+        selectPart("Weapons", part.name, false, true);
+      } else {
+        selectPart(cat, part.name);
+      }
+
+      statsDiv.innerText = part.stats;
+    };
+
     partsDiv.appendChild(el);
   });
 }
 
 loadCategories();
-</script>
 
-</body>
-</html>
+</script>
