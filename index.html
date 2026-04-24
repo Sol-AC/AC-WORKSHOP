@@ -1,345 +1,321 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>AC Builder</title>
+<title>AC Builder FULL TRUE</title>
+
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #111;
-  color: white;
-}
+body { margin:0; font-family:Arial; background:#111; color:#fff; }
 
-.container {
-  display: flex;
-  height: 66vh;
-}
-
-.panel {
-  flex: 1;
-  border-right: 1px solid #333;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.panel:last-child {
-  border-right: none;
-}
+.container { display:flex; height:66vh; }
+.panel { flex:1; border-right:1px solid #333; overflow:auto; padding:10px; }
+.panel h2 { text-align:center; }
 
 .item {
-  padding: 6px;
-  cursor: pointer;
-  border-bottom: 1px solid #333;
+  background:#222;
+  margin:4px 0;
+  padding:6px;
+  cursor:pointer;
 }
+.item:hover { background:#555; }
 
-.item:hover {
-  background: #333;
-}
+.bottom { height:34vh; display:flex; border-top:2px solid #333; }
+.left,.right { flex:1; padding:10px; }
 
-.selected {
-  background: #555;
-}
-
-.bottom {
-  height: 34vh;
-  display: flex;
-  border-top: 2px solid #444;
-}
-
-.bottom-left {
-  flex: 2;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-.bottom-right {
-  flex: 1;
-  padding: 10px;
-  border-left: 2px solid #444;
-}
-
-h3 {
-  margin-top: 0;
-}
-
+.box { background:#222; padding:10px; margin-top:10px; }
 </style>
+
 </head>
 <body>
 
 <div class="container">
-  <div class="panel" id="categories"></div>
-  <div class="panel" id="subcategories"></div>
+  <div class="panel" id="cat"></div>
+  <div class="panel" id="sub"></div>
   <div class="panel" id="parts"></div>
   <div class="panel" id="stats"></div>
 </div>
 
 <div class="bottom">
-  <div class="bottom-left" id="selected"></div>
-  <div class="bottom-right">
-    <h3>Totals</h3>
-    <div>WP: <span id="wp">0</span></div>
-    <div>LP: <span id="lp">0</span></div>
-    <div>Result (LP - WP): <span id="result">0</span></div>
-    <div id="status"></div>
+  <div class="left">
+    <h3>Selected</h3>
+    <div id="selected"></div>
+  </div>
+
+  <div class="right">
+    <div class="box">WP: <span id="wp">0</span></div>
+    <div class="box">LP: <span id="lp">0</span></div>
+    <div class="box">Result: <span id="res">0</span></div>
+    <div class="box" id="status"></div>
   </div>
 </div>
 
 <script>
 
-// ================= DATA =================
+// ================= FULL DATA (UNCHANGED STRUCTURE) =================
 
 const data = {
-  Heads: {
-    "All": [
-      {name:"KE Head", wp:200},
-      {name:"CE Head", wp:225},
-      {name:"TE Head", wp:275}
-    ]
-  },
 
-  Cores: {
-    "KE": [
-      {name:"Light KE Core", wp:575, desc:"Low armor"},
-      {name:"Middle KE Core", wp:725, desc:"Low-Mid armor"}
-    ],
-    "CE": [
-      {name:"Middle CE Core", wp:850},
-      {name:"Heavy CE Core", wp:1000}
-    ],
-    "TE": [
-      {name:"Middle TE Core", wp:1150},
-      {name:"Heavy TE Core", wp:1250}
-    ]
-  },
+"Heads":{
+ "All":[
+  {name:"KE Head", WP:200},
+  {name:"CE Head", WP:225},
+  {name:"TE Head", WP:275}
+ ]
+},
 
-  Arms: {
-    "Normal": [
-      {name:"KE Light Arms", wp:275},
-      {name:"KE Middle Arms", wp:450},
-      {name:"KE Heavy Arms", wp:525},
-      {name:"CE Light Arms", wp:325},
-      {name:"CE Middle Arms", wp:475},
-      {name:"CE Heavy Arms", wp:575},
-      {name:"TE Middle Arms", wp:850},
-      {name:"TE Heavy Arms", wp:1000}
-    ],
-    "Weapon": [
-      {name:"Sniper Cannon Arms", wp:2000},
-      {name:"Blade Arms", wp:2500},
-      {name:"Scatter Cannon Arms", wp:2050},
-      {name:"Cannon Arms", wp:2450},
-      {name:"Laser Cannon Arms", wp:2500},
-      {name:"Scatter Pulse Arms", wp:2300}
-    ],
-    "Experimental": [
-      {name:"Shield Arms", wp:2200},
-      {name:"Repeater Cannon Arms", wp:2150}
-    ]
-  },
+"Cores":{
+ "KE Cores":[
+  {name:"Light KE Core", WP:575, stats:"Low armor"},
+  {name:"Middle KE Core", WP:725, stats:"Low-Mid armor"}
+ ],
+ "CE Cores":[
+  {name:"Middle CE Core", WP:850, stats:"Mid armor +15 delay"},
+  {name:"Heavy CE Core", WP:1000, stats:"Mid-Heavy armor +20 delay"}
+ ],
+ "TE Cores":[
+  {name:"Middle TE Core", WP:1150, stats:"Heavy armor +1 dome"},
+  {name:"Heavy TE Core", WP:1250, stats:"Heaviest armor +2 domes"}
+ ]
+},
 
-  Legs: {
-    "All": [
-      {name:"Bipedal Light", lp:0},
-      {name:"Bipedal Mid", lp:0},
-      {name:"Bipedal Heavy", lp:0},
-      {name:"Reverse Light", lp:0},
-      {name:"Reverse Heavy", lp:0},
-      {name:"Tetrapod", lp:0},
-      {name:"Tank", lp:0}
-    ]
-  },
+"ARMS":{
+ "KE Arms":[
+  {name:"KE Light Arms", WP:275, stats:"No shoulder"},
+  {name:"KE Middle Arms", WP:450, stats:"1 shoulder"},
+  {name:"KE Heavy Arms", WP:525, stats:"2 shoulders"}
+ ],
+ "CE Arms":[
+  {name:"CE Light Arms", WP:325, stats:"No shoulder"},
+  {name:"CE Middle Arms", WP:475, stats:"1 shoulder"},
+  {name:"CE Heavy Arms", WP:575, stats:"2 shoulders"}
+ ],
+ "TE Arms":[
+  {name:"TE Middle Arms", WP:850, stats:"1 shoulder"},
+  {name:"TE Heavy Arms", WP:1000, stats:"2 shoulders"}
+ ],
 
-  FCS: {
-    "All": [
-      {name:"High speed", wp:0},
-      {name:"Normal speed", wp:0},
-      {name:"Low speed", wp:0}
-    ]
-  },
+ "Weapon Arms":[
+  {name:"CE Sniper Cannon Arms", WP:2000, stats:"14 cannons"},
+  {name:"MELEE Blade Arms", WP:2500, stats:"6 spike blocks"},
+  {name:"CE Scatter Cannon Arms", WP:2050, stats:"spread"},
+  {name:"CE Cannon Arms", WP:2450, stats:"heavy cannons"},
+  {name:"TE Laser Cannon Arms", WP:2500, stats:"laser"},
+  {name:"TE Scatter Pulse Arms", WP:2300, stats:"pulse spread"}
+ ],
 
-  Boosters: {
-    "All": [
-      {name:"Low energy", wp:0},
-      {name:"High acceleration", wp:0},
-      {name:"High power", wp:0},
-      {name:"Balanced", wp:0}
-    ]
-  },
+ "Experimental":[
+  {name:"Shield Arms", WP:2200, stats:"transform shield"},
+  {name:"Repeater Cannon Arms", WP:2150, stats:"burst cannon"}
+ ]
+},
 
-  Weapons: {
-    "KE": [
-      {name:"Handgun", wp:250},
-      {name:"Rifle", wp:525},
-      {name:"Gatling", wp:950}
-    ],
-    "CE": [
-      {name:"Shotgun", wp:450},
-      {name:"Sniper Rifle", wp:625}
-    ],
-    "TE": [
-      {name:"Pulse Gun", wp:250},
-      {name:"Plasma Gun", wp:875}
-    ],
-    "Melee": [
-      {name:"Physical Blade", wp:150},
-      {name:"Pile Driver", wp:225}
-    ]
-  },
+"LEGS":{
+ "Bipedal":[
+  {name:"Light Fast", LP:3000},
+  {name:"Light Load", LP:3400},
+  {name:"Mid Fast", LP:4250},
+  {name:"Mid Balance", LP:4500},
+  {name:"Mid Load", LP:5100},
+  {name:"Heavy Fast", LP:5500},
+  {name:"Heavy Balance", LP:6200},
+  {name:"Heavy Load", LP:6750}
+ ],
+ "Reverse":[
+  {name:"Light Fast", LP:3200},
+  {name:"Light Turning", LP:3800},
+  {name:"Heavy Fast", LP:5300},
+  {name:"Heavy Balance", LP:6100},
+  {name:"Heavy Load", LP:6650}
+ ],
+ "Tetrapod":[
+  {name:"Fast", LP:5400},
+  {name:"Load", LP:5900}
+ ],
+ "Tank":[
+  {name:"Fast", LP:7000},
+  {name:"Balance", LP:7500},
+  {name:"Load", LP:8000}
+ ]
+},
 
-  Shoulders: {
-    "All": [
-      {name:"Shield Dropper", wp:400},
-      {name:"Mine Dropper", wp:325},
-      {name:"Energy Amplifier", wp:650},
-      {name:"Reserve Magazine", wp:650},
-      {name:"Rockets", wp:600}
-    ]
-  }
+"FCS":{
+ "Types":[
+  {name:"High speed type", stats:"Vertical=3"},
+  {name:"Normal speed type", stats:"Vertical=2"},
+  {name:"Low speed type", stats:"Vertical=1"}
+ ]
+},
+
+"Boosters":{
+ "Types":[
+  {name:"Low energy-consumption type", stats:"stats"},
+  {name:"High acceleration type", stats:"stats"},
+  {name:"High power type", stats:"stats"},
+  {name:"Balanced type", stats:"stats"}
+ ]
+},
+
+"Shoulder units":{
+ "Defense":[
+  {name:"Shield dropper", WP:400},
+  {name:"Mine dropper", WP:325}
+ ],
+ "Support":[
+  {name:"Energy Amplifier", WP:650},
+  {name:"Reserve Magazine", WP:650}
+ ],
+ "Offensive":[
+  {name:"H.E.A.T. Rockets", WP:600},
+  {name:"Plasma Spitter", WP:550}
+ ]
+}
+
 };
 
-// ================= STATE =================
+// ===== FULL WEAPONS (ALL INCLUDED) =====
 
-let selectedCategory = null;
-let selectedSub = null;
+const weapons = {
+"KE Weapons":[
+{name:"Handgun",WP:250},
+{name:"Rifle",WP:525},
+{name:"Gatling Gun",WP:950},
+{name:"Light Gatling Gun",WP:375},
+{name:"Auto Cannon (4 barrel)",WP:1025},
+{name:"Auto Cannon (3 barrel)",WP:1025}
+],
+"CE Weapons":[
+{name:"Shotgun",WP:450},
+{name:"Sniper Rifle",WP:625},
+{name:"H.E.A.T. Howitzer",WP:375},
+{name:"H.E.A.T. Machine Gun",WP:275},
+{name:"Batle Riffle",WP:975},
+{name:"Repeater Cannon",WP:850},
+{name:"Sniper Cannon",WP:1000},
+{name:"Howitzer Cannon",WP:1250}
+],
+"TE Weapons":[
+{name:"Pulse Gun",WP:250},
+{name:"Pulse Machine Gun",WP:425},
+{name:"Plasma Gun",WP:875},
+{name:"Laser Rifle (Ammo)",WP:600},
+{name:"Laser Rifle (Damage)",WP:1375},
+{name:"Pulse Cannon",WP:1000},
+{name:"Laser Cannon",WP:1300}
+],
+"Melee":[
+{name:"Physical Blade",WP:150},
+{name:"Pile Driver",WP:225},
+{name:"H.E.A.T. Pile Driver",WP:300}
+],
+"Laser Blades":[
+{name:"1",stats:"stats"},
+{name:"2",stats:"stats"},
+{name:"3",stats:"stats"},
+{name:"4",stats:"stats"},
+{name:"5",stats:"stats"},
+{name:"6",stats:"stats"},
+{name:"7",stats:"stats"},
+{name:"8",stats:"stats"},
+{name:"9",stats:"stats"}
+],
+"Shields":[
+{name:"Shield KE",WP:500},
+{name:"Shield CE",WP:525},
+{name:"Shield TE",WP:600}
+],
+"Sentries":[
+{name:"KE",stats:"stats"},
+{name:"CE",stats:"stats"},
+{name:"TE",stats:"stats"}
+]
+};
 
-let selections = {};
-let weapons = [];
+// assign to all 4 weapon categories
+["Weapons R","Weapons L","Weapons R Bay","Weapons L Bay"].forEach(c=>{
+  data[c]=weapons;
+});
 
 // ================= UI =================
 
-function renderCategories() {
-  const el = document.getElementById("categories");
-  el.innerHTML = "<h3>Categories</h3>";
+let cat, sub;
+let selected={};
 
-  Object.keys(data).forEach(cat => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = cat;
-
-    div.onclick = () => {
-      selectedCategory = cat;
-      selectedSub = null;
-      renderSubcategories();
-      renderParts([]);
-      renderStats(null);
-    };
-
-    el.appendChild(div);
-  });
+function renderCats(){
+ const el=document.getElementById("cat");
+ el.innerHTML="<h2>Categories</h2>";
+ Object.keys(data).forEach(c=>{
+  const d=document.createElement("div");
+  d.className="item";
+  d.textContent=c;
+  d.onclick=()=>{cat=c;renderSubs();};
+  el.appendChild(d);
+ });
 }
 
-function renderSubcategories() {
-  const el = document.getElementById("subcategories");
-  el.innerHTML = "<h3>Subcategories</h3>";
-
-  if (!selectedCategory) return;
-
-  Object.keys(data[selectedCategory]).forEach(sub => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = sub;
-
-    div.onclick = () => {
-      selectedSub = sub;
-      renderParts(data[selectedCategory][sub]);
-    };
-
-    el.appendChild(div);
-  });
+function renderSubs(){
+ const el=document.getElementById("sub");
+ el.innerHTML="<h2>Subcategories</h2>";
+ Object.keys(data[cat]).forEach(s=>{
+  const d=document.createElement("div");
+  d.className="item";
+  d.textContent=s;
+  d.onclick=()=>{sub=s;renderParts();};
+  el.appendChild(d);
+ });
 }
 
-function renderParts(parts) {
-  const el = document.getElementById("parts");
-  el.innerHTML = "<h3>Parts</h3>";
-
-  parts.forEach(part => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = part.name;
-
-    div.onclick = () => {
-      renderStats(part);
-      selectPart(part);
-    };
-
-    el.appendChild(div);
-  });
+function renderParts(){
+ const el=document.getElementById("parts");
+ el.innerHTML="<h2>Parts</h2>";
+ data[cat][sub].forEach(p=>{
+  const d=document.createElement("div");
+  d.className="item";
+  d.textContent=p.name;
+  d.onclick=()=>{
+   selected[cat]=p;
+   showStats(p);
+   update();
+  };
+  el.appendChild(d);
+ });
 }
 
-function renderStats(part) {
-  const el = document.getElementById("stats");
-  el.innerHTML = "<h3>Stats</h3>";
-
-  if (!part) return;
-
-  el.innerHTML += `<div>${part.name}</div>`;
-  if (part.wp) el.innerHTML += `<div>WP: ${part.wp}</div>`;
-  if (part.lp) el.innerHTML += `<div>LP: ${part.lp}</div>`;
+function showStats(p){
+ const el=document.getElementById("stats");
+ el.innerHTML="<h2>Stats</h2>";
+ Object.keys(p).forEach(k=>{
+  if(k==="name") return;
+  const d=document.createElement("div");
+  d.textContent=k+": "+p[k];
+  el.appendChild(d);
+ });
 }
 
-// ================= SELECTION =================
+function update(){
+ let wp=0, lp=0;
+ const el=document.getElementById("selected");
+ el.innerHTML="";
 
-function selectPart(part) {
+ Object.keys(selected).forEach(c=>{
+  const p=selected[c];
+  const d=document.createElement("div");
+  d.textContent=c+": "+p.name;
+  el.appendChild(d);
 
-  if (selectedCategory === "Weapons") {
-    if (weapons.length >= 4) {
-      alert("Max 4 weapons!");
-      return;
-    }
-    weapons.push(part);
-  } else {
-    selections[selectedCategory] = part;
-  }
+  if(p.WP) wp+=p.WP;
+  if(p.LP) lp+=p.LP;
+ });
 
-  updateBottom();
+ const res=lp-wp;
+
+ document.getElementById("wp").textContent=wp;
+ document.getElementById("lp").textContent=lp;
+ document.getElementById("res").textContent=res;
+ document.getElementById("status").textContent =
+  res<0 ? "Overweight" : "OK";
 }
 
-// ================= CALCULATIONS =================
-
-function updateBottom() {
-  const el = document.getElementById("selected");
-  el.innerHTML = "<h3>Selected Parts</h3>";
-
-  let totalWP = 0;
-  let totalLP = 0;
-
-  for (let cat in selections) {
-    let p = selections[cat];
-    el.innerHTML += `<div>${cat}: ${p.name}</div>`;
-
-    if (cat === "Legs") {
-      totalLP += p.lp || 0;
-    } else {
-      totalWP += p.wp || 0;
-    }
-  }
-
-  weapons.forEach((w, i) => {
-    el.innerHTML += `<div>Weapon ${i+1}: ${w.name}</div>`;
-    totalWP += w.wp;
-  });
-
-  document.getElementById("wp").textContent = totalWP;
-  document.getElementById("lp").textContent = totalLP;
-
-  let result = totalLP - totalWP;
-  document.getElementById("result").textContent = result;
-
-  let status = document.getElementById("status");
-
-  if (result < 0) {
-    status.textContent = "Overweight";
-    status.style.color = "red";
-  } else {
-    status.textContent = "OK";
-    status.style.color = "lightgreen";
-  }
-}
-
-// ================= INIT =================
-
-renderCategories();
+renderCats();
 
 </script>
 
